@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "245049010313",
+    "project_id": "instagram-clone-55d17",
+    "storage_bucket": "instagram-clone-55d17.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:245049010313:android:fd2f842fdb17cc22e9fe58",
+        "android_client_info": {
+          "package_name": "app.totoybibo.com.instagram"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "245049010313-efo0an9u05ocegekrmcft0488s7km9l5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBi7YcLUu5VG35ybD7bF22ixk80F1KXdNA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "245049010313-efo0an9u05ocegekrmcft0488s7km9l5.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "245049010313-tupb63umtcffqpfuol4p4fv25l0cgin4.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "app.totoybibo.com.instagram"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
