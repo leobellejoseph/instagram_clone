@@ -4,7 +4,6 @@ import 'package:instagram_clone/screens/nav/widgets/tab_navigator.dart';
 import 'package:instagram_clone/screens/nav/cubit/bottom_nav_bar_cubit.dart';
 import 'package:instagram_clone/screens/nav/widgets/bottom_nav_bar.dart';
 import 'package:instagram_clone/enums/enums.dart';
-import 'package:modal_progress_hud/modal_progress_hud.dart';
 
 class NavScreen extends StatelessWidget {
   static const id = 'nav';

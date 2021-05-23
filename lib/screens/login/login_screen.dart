@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:instagram_clone/repositories/repositories.dart';
 import 'package:instagram_clone/screens/login/cubit/login_cubit.dart';
 import 'package:instagram_clone/screens/signup/signup_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:instagram_clone/widgets/widgets.dart';
+import 'package:modal_progress_hud/modal_progress_hud.dart';
 
 class LoginScreen extends StatelessWidget {
   final TextEditingController _emailController = TextEditingController();
@@ -49,90 +51,98 @@ class LoginScreen extends StatelessWidget {
           builder: (context, state) {
             return Scaffold(
               resizeToAvoidBottomInset: false,
-              body: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.bottomLeft,
-                    end: Alignment.topRight,
-                    colors: [
-                      Colors.blueAccent.withOpacity(0.2),
-                      Colors.blueAccent.withOpacity(0.3),
-                    ],
+              body: ModalProgressHUD(
+                inAsyncCall: state.status == LoginStatus.submitting,
+                progressIndicator: SpinKitSpinningCircle(color: Colors.amber),
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.bottomLeft,
+                      end: Alignment.topRight,
+                      colors: [
+                        Colors.blueAccent.withOpacity(0.2),
+                        Colors.blueAccent.withOpacity(0.3),
+                      ],
+                    ),
                   ),
-                ),
-                child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24.0),
-                    child: Card(
-                      elevation: 4,
-                      child: Form(
-                        key: _formKey,
-                        child: Padding(
-                          padding: const EdgeInsets.all(20.0),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Text(
-                                'Instagram',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                    fontSize: 28, fontWeight: FontWeight.bold),
-                              ),
-                              const SizedBox(height: 10),
-                              TextFormField(
-                                onChanged: (value) => context
-                                    .read<LoginCubit>()
-                                    .emailChanged(value),
-                                validator: (value) => !value.contains('@')
-                                    ? 'Please enter a valid email.'
-                                    : null,
-                                controller: _emailController,
-                                autocorrect: false,
-                                enableSuggestions: false,
-                                keyboardType: TextInputType.emailAddress,
-                                decoration: const InputDecoration(
-                                  hintText: 'Email',
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24.0),
+                      child: Card(
+                        elevation: 4,
+                        child: Form(
+                          key: _formKey,
+                          child: Padding(
+                            padding: const EdgeInsets.all(20.0),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Text(
+                                  'Instagram',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                      fontSize: 28,
+                                      fontWeight: FontWeight.bold),
                                 ),
-                              ),
-                              TextFormField(
-                                onChanged: (value) => context
-                                    .read<LoginCubit>()
-                                    .passwordChanged(value),
-                                validator: (value) => value.length < 6
-                                    ? 'Please enter valid password.'
-                                    : null,
-                                controller: _passwordController,
-                                autocorrect: false,
-                                enableSuggestions: false,
-                                obscureText: true,
-                                keyboardType: TextInputType.visiblePassword,
-                                decoration:
-                                    const InputDecoration(hintText: 'Password'),
-                              ),
-                              const SizedBox(height: 10),
-                              ElevatedButton(
-                                onPressed: () => _submitForm(
-                                    context, LoginStatus.submitting),
-                                child: Text('Log In'),
-                              ),
-                              const SizedBox(height: 10),
-                              TextButton(
-                                style: TextButton.styleFrom(
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
+                                const SizedBox(height: 10),
+                                TextFormField(
+                                  onChanged: (value) => context
+                                      .read<LoginCubit>()
+                                      .emailChanged(value),
+                                  validator: (value) => !value.contains('@')
+                                      ? 'Please enter a valid email.'
+                                      : null,
+                                  controller: _emailController,
+                                  autocorrect: false,
+                                  enableSuggestions: false,
+                                  keyboardType: TextInputType.emailAddress,
+                                  decoration: const InputDecoration(
+                                    hintText: 'Email',
                                   ),
-                                  primary: Colors.blue,
                                 ),
-                                onPressed: () => Navigator.pushNamed(
-                                    context, SignupScreen.id),
-                                child: Text(
-                                  'Don\'t have an account? Sign up',
-                                  style: TextStyle(color: Colors.grey[600]),
+                                TextFormField(
+                                  onChanged: (value) => context
+                                      .read<LoginCubit>()
+                                      .passwordChanged(value),
+                                  validator: (value) => value.length < 6
+                                      ? 'Please enter valid password.'
+                                      : null,
+                                  controller: _passwordController,
+                                  autocorrect: false,
+                                  enableSuggestions: false,
+                                  obscureText: true,
+                                  keyboardType: TextInputType.visiblePassword,
+                                  decoration: const InputDecoration(
+                                      hintText: 'Password'),
                                 ),
-                              ),
-                            ],
+                                const SizedBox(height: 10),
+                                ElevatedButton(
+                                  onPressed:
+                                      state.status == LoginStatus.submitting
+                                          ? null
+                                          : () => _submitForm(
+                                              context, LoginStatus.submitting),
+                                  child: Text('Log In'),
+                                ),
+                                const SizedBox(height: 10),
+                                TextButton(
+                                  style: TextButton.styleFrom(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    primary: Colors.blue,
+                                  ),
+                                  onPressed: () => Navigator.pushNamed(
+                                      context, SignupScreen.id),
+                                  child: Text(
+                                    'Don\'t have an account? Sign up',
+                                    style: TextStyle(color: Colors.grey[600]),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),

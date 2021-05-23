@@ -1,14 +1,53 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:instagram_clone/blocs/auth/auth_bloc.dart';
+import 'package:instagram_clone/models/model.dart';
+import 'package:instagram_clone/repositories/repositories.dart';
 import 'package:instagram_clone/screens/profile/bloc/profile_bloc.dart';
-import 'package:instagram_clone/widgets/error_dialogue.dart';
-import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:instagram_clone/widgets/widgets.dart';
 import 'widgets/widgets.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreenArgs {
+  final String userId;
+  const ProfileScreenArgs({@required this.userId});
+}
+
+class ProfileScreen extends StatefulWidget {
   static const id = 'profile';
+  ProfileScreen();
+  static Route route({@required ProfileScreenArgs args}) => MaterialPageRoute(
+        settings: const RouteSettings(name: ProfileScreen.id),
+        builder: (context) => BlocProvider<ProfileBloc>(
+          create: (_) => ProfileBloc(
+            userRepository: context.read<UserRepository>(),
+            postRepository: context.read<PostRepository>(),
+            authBloc: context.read<AuthBloc>(),
+          )..add(ProfileLoadUser(userId: args.userId)),
+          child: ProfileScreen(),
+        ),
+      );
+
+  @override
+  _ProfileScreenState createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen>
+    with SingleTickerProviderStateMixin {
+  TabController _tabController;
+
+  @override
+  void initState() {
+    _tabController = TabController(length: 2, vsync: this);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,59 +61,137 @@ class ProfileScreen extends StatelessWidget {
         }
       },
       builder: (context, state) {
-        return ModalProgressHUD(
-          inAsyncCall: state.status == ProfileStatus.initial,
-          child: Scaffold(
-            appBar: AppBar(
-              title: Text(state.user.username),
-              actions: [
-                if (state.isCurrentUser)
-                  IconButton(
-                    icon: Icon(Icons.exit_to_app),
-                    onPressed: () => context.read<AuthBloc>().add(
-                          AuthLogoutRequested(),
-                        ),
-                  ),
-              ],
-            ),
-            body: CustomScrollView(
-              slivers: [
-                SliverToBoxAdapter(
-                  child: Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(24, 32, 24, 0),
-                        child: Row(
-                          children: [
-                            UserProfileImage(
-                                radius: 40,
-                                profileImageUrl: state.user.profileImageUrl),
-                            ProfileStats(
-                              isCurrentUser: state.isCurrentUser,
-                              isFollowing: state.isFollowing,
-                              posts: 0,
-                              followers: state.user.followers,
-                              following: state.user.following,
-                            ),
-                          ],
-                        ),
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(state.user.username),
+            actions: [
+              if (state.isCurrentUser)
+                IconButton(
+                  icon: Icon(Icons.exit_to_app),
+                  onPressed: () => context.read<AuthBloc>().add(
+                        AuthLogoutRequested(),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 30, vertical: 10),
-                        child: ProfileInfo(
-                          username: state.user.username,
-                          bio: state.user.bio,
-                        ),
-                      )
-                    ],
-                  ),
-                )
+                ),
+            ],
+          ),
+          body: _buildBody(state),
+        );
+      },
+    );
+  }
+
+  Widget _buildBody(ProfileState state) {
+    switch (state.status) {
+      case ProfileStatus.loading:
+        return Center(child: SpinKitCircle(color: Colors.blueAccent));
+      default:
+        return RefreshIndicator(
+          onRefresh: () async {
+            context
+                .read<ProfileBloc>()
+                .add(ProfileLoadUser(userId: state.user.id));
+            return true;
+          },
+          child: CustomScrollView(
+            slivers: [
+              _profileView(state),
+              _contentView(state),
+              state.isGridView ? _gridView(state) : _listView(state),
+            ],
+          ),
+        );
+    }
+  }
+
+  Widget _profileView(ProfileState state) {
+    return SliverToBoxAdapter(
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 32, 24, 0),
+            child: Row(
+              children: [
+                UserProfileImage(
+                    radius: 40, profileImageUrl: state.user.profileImageUrl),
+                ProfileStats(
+                  isCurrentUser: state.isCurrentUser,
+                  isFollowing: state.isFollowing,
+                  posts: state.posts.length,
+                  followers: state.user.followers,
+                  following: state.user.following,
+                ),
               ],
             ),
           ),
-        );
-      },
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+            child: ProfileInfo(
+              username: state.user.username,
+              bio: state.user.bio,
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget _contentView(ProfileState state) {
+    return SliverToBoxAdapter(
+      child: TabBar(
+        controller: _tabController,
+        labelColor: Theme.of(context).primaryColor,
+        unselectedLabelColor: Colors.grey,
+        indicatorWeight: 3,
+        tabs: [
+          Tab(icon: Icon(Icons.grid_on, size: 28)),
+          Tab(icon: Icon(Icons.list, size: 28))
+        ],
+        onTap: (index) => context
+            .read<ProfileBloc>()
+            .add(ProfileToggleGridView(isGridView: index == 0)),
+      ),
+    );
+  }
+
+  Widget _listView(ProfileState state) {
+    return SliverList(
+      delegate: SliverChildBuilderDelegate(
+        (context, index) {
+          final Post post = state.posts[index];
+          return PostView(post: post, isLiked: false);
+        },
+        childCount: state.posts.length,
+      ),
+    );
+  }
+
+  Widget _gridView(ProfileState state) {
+    return SliverGrid(
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        mainAxisSpacing: 2,
+        crossAxisSpacing: 2,
+      ),
+      delegate: SliverChildBuilderDelegate(
+        (context, index) {
+          final Post post = state.posts[index];
+          return GestureDetector(
+            onTap: () {},
+            child: Padding(
+              padding: const EdgeInsets.all(2.5),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: CachedNetworkImage(
+                    progressIndicatorBuilder: (context, url, progress) =>
+                        SpinKitFadingCircle(color: Colors.amber),
+                    imageUrl: post.imageUrl,
+                    fit: BoxFit.cover),
+              ),
+            ),
+          );
+        },
+        childCount: state.posts.length,
+      ),
     );
   }
 }

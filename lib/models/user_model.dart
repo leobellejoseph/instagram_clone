@@ -21,7 +21,7 @@ class User extends Equatable {
     @required this.bio,
   });
 
-  User copyWith(
+  User copyWith({
     String id,
     String username,
     String email,
@@ -29,7 +29,7 @@ class User extends Equatable {
     int followers,
     int following,
     String bio,
-  ) =>
+  }) =>
       User(
         id: id ?? this.id,
         username: username ?? this.username,
@@ -81,6 +81,7 @@ class User extends Equatable {
       'profileImageUrl': profileImageUrl,
       'followers': followers,
       'following': following,
+      'bio': bio,
     };
   }
 }

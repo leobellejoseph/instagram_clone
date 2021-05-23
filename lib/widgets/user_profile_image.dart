@@ -30,5 +30,6 @@ class UserProfileImage extends StatelessWidget {
       return Icon(Icons.account_circle,
           color: Colors.grey[400], size: radius * 2);
     }
+    return null;
   }
 }

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:instagram_clone/repositories/repositories.dart';
-import 'package:instagram_clone/screens/login/login_screen.dart';
-import 'package:instagram_clone/screens/nav/nav_screen.dart';
+import 'package:instagram_clone/screens/screens.dart';
 import 'cubit/signup_cubit.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:instagram_clone/widgets/widgets.dart';
