@@ -182,6 +182,11 @@ class _ProfileScreenState extends State<ProfileScreen>
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(10),
                 child: CachedNetworkImage(
+                    errorWidget: (context, url, error) => Icon(
+                          Icons.image_sharp,
+                          size: 100,
+                          color: Colors.grey[500],
+                        ),
                     progressIndicatorBuilder: (context, url, progress) =>
                         SpinKitFadingCircle(color: Colors.amber),
                     imageUrl: post.imageUrl,

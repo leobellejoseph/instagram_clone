@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:instagram_clone/screens/profile/bloc/profile_bloc.dart';
 import 'package:instagram_clone/screens/screens.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:instagram_clone/repositories/repositories.dart';
 
 class ProfileButton extends StatelessWidget {
   final bool isCurrentUser;
