@@ -1,13 +1,15 @@
 import 'package:equatable/equatable.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:instagram_clone/blocs/auth/auth_bloc.dart';
 import 'package:instagram_clone/blocs/simple_bloc_observer.dart';
 import 'package:instagram_clone/repositories/repositories.dart';
-import 'screens/screens.dart';
+
 import 'config/custom_router.dart';
+import 'cubit/cubits.dart';
+import 'screens/screens.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -34,12 +36,21 @@ class MyApp extends StatelessWidget {
         RepositoryProvider<PostRepository>(
           create: (_) => PostRepository(),
         ),
+        RepositoryProvider<NotificationRepository>(
+          create: (_) => NotificationRepository(),
+        ),
       ],
       child: MultiBlocProvider(
         providers: [
           BlocProvider<AuthBloc>(
             create: (context) => AuthBloc(
               authReporsitory: context.read<AuthReporsitory>(),
+            ),
+          ),
+          BlocProvider<LikedPostsCubit>(
+            create: (context) => LikedPostsCubit(
+              postRepository: context.read<PostRepository>(),
+              authBloc: context.read<AuthBloc>(),
             ),
           ),
         ],

@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:instagram_clone/blocs/auth/auth_bloc.dart';
+import 'package:instagram_clone/cubit/cubits.dart';
 import 'package:instagram_clone/models/model.dart';
 import 'package:instagram_clone/repositories/repositories.dart';
 import 'package:instagram_clone/screens/profile/bloc/profile_bloc.dart';
+import 'package:instagram_clone/screens/screens.dart';
 import 'package:instagram_clone/widgets/widgets.dart';
 import 'widgets/widgets.dart';
 
@@ -24,6 +26,7 @@ class ProfileScreen extends StatefulWidget {
             userRepository: context.read<UserRepository>(),
             postRepository: context.read<PostRepository>(),
             authBloc: context.read<AuthBloc>(),
+            likedPostsCubit: context.read<LikedPostsCubit>(),
           )..add(ProfileLoadUser(userId: args.userId)),
           child: ProfileScreen(),
         ),
@@ -68,9 +71,10 @@ class _ProfileScreenState extends State<ProfileScreen>
               if (state.isCurrentUser)
                 IconButton(
                   icon: Icon(Icons.exit_to_app),
-                  onPressed: () => context.read<AuthBloc>().add(
-                        AuthLogoutRequested(),
-                      ),
+                  onPressed: () {
+                    context.read<AuthBloc>().add(AuthLogoutRequested());
+                    context.read<LikedPostsCubit>().clearAllLikedPosts();
+                  },
                 ),
             ],
           ),
@@ -158,7 +162,22 @@ class _ProfileScreenState extends State<ProfileScreen>
       delegate: SliverChildBuilderDelegate(
         (context, index) {
           final Post post = state.posts[index];
-          return PostView(post: post, isLiked: false);
+          final likedPostsState = context.watch<LikedPostsCubit>().state;
+          final isLiked = likedPostsState.likedPostIds.contains(post.id);
+          // final recentlyLiked =
+          //     likedPostsState.recentlyLikedPostIds.contains(post.id);
+          return PostView(
+            post: post,
+            isLiked: isLiked,
+            //recentlyLiked: recentlyLiked,
+            onLike: () {
+              if (isLiked) {
+                context.read<LikedPostsCubit>().unlikedPost(post: post);
+              } else {
+                context.read<LikedPostsCubit>().likedPost(post: post);
+              }
+            },
+          );
         },
         childCount: state.posts.length,
       ),
@@ -176,7 +195,8 @@ class _ProfileScreenState extends State<ProfileScreen>
         (context, index) {
           final Post post = state.posts[index];
           return GestureDetector(
-            onTap: () {},
+            onTap: () => Navigator.of(context).pushNamed(CommentsScreen.id,
+                arguments: CommentsScreenArgs(post: post)),
             child: Padding(
               padding: const EdgeInsets.all(2.5),
               child: ClipRRect(

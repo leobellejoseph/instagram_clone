@@ -8,3 +8,5 @@ export 'post/base_post_repository.dart';
 export 'post/post_repository.dart';
 export 'comment/base_comment_repository.dart';
 export 'comment/comment_repository.dart';
+export 'notification/base_notification_repository.dart';
+export 'notification/notification_repository.dart';

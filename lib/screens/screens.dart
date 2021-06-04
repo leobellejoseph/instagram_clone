@@ -9,3 +9,4 @@ export 'profile/profile_screen.dart';
 export 'signup/signup_screen.dart';
 export 'search/search_screen.dart';
 export 'edit_profile/edit_profile_screen.dart';
+export 'comments/comments_screen.dart';

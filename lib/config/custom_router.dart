@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'package:instagram_clone/screens/screens.dart';
 
 class CustomRoute {
@@ -24,6 +25,8 @@ class CustomRoute {
 
   static Route onGenerateNestedRouted(RouteSettings settings) {
     switch (settings.name) {
+      case CommentsScreen.id:
+        return CommentsScreen.route(args: settings.arguments);
       case EditProfileScreen.id:
         return EditProfileScreen.route(args: settings.arguments);
       case ProfileScreen.id:
